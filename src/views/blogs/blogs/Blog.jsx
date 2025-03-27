@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { CForm, CFormInput, CFormTextarea, CButton, CCard, CCardBody, CCardHeader, CFormLabel } from "@coreui/react";
 import TyniMCE from "../../../components/TyniMCE";
 import ImageShow from "../../../components/ImageShow";
+import { PERSONAL_API_KEY } from "../../../config/configuration";
 
 const Blogs = () => {
   const [validated, setValidated] = useState(false);
@@ -62,7 +63,7 @@ const Blogs = () => {
     }
 
   }
-
+  console.log(PERSONAL_API_KEY)
   const handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();

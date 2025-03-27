@@ -1,0 +1,17 @@
+
+
+.tox-tinymce{
+    border: 1px solid rgba(255, 255, 255, 0.87) !important;
+    /* height: 200px !important; */
+}
+
+.tox-editor-container{
+    
+    /* background: #212631 !important; */
+    background: #212631 !important;
+}
+
+
+.tox-editor-header, .tox-toolbar__primary{
+    background: #212631 !important;    
+}

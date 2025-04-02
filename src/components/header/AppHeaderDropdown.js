@@ -23,7 +23,7 @@ import {
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
-import avatar8 from './../../assets/images/avatars/8.jpg'
+import avatar8 from '/images/avatars/8.jpg'
 import { customSweetAlert } from '../Popups';
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'

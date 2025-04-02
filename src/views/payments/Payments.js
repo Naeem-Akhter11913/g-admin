@@ -43,12 +43,12 @@ import {
   cilUserFemale,
 } from '@coreui/icons'
 
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
+import avatar1 from '/images/avatars/1.jpg'
+import avatar2 from '/images/avatars/2.jpg'
+import avatar3 from '/images/avatars/3.jpg'
+import avatar4 from '/images/avatars/4.jpg'
+import avatar5 from '/images/avatars/5.jpg'
+import avatar6 from '/images/avatars/6.jpg'
 import Pagination from '../../components/Pagination'
 
 const progressGroupExample1 = [

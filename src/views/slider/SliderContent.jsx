@@ -20,23 +20,12 @@ const SliderContent = () => {
 
     const [validated, setValidated] = useState(false);
     const [sliderFormData, setSliderFormData] = useState({
-        sliderHeading: null,
-        sliderTitle: null,
+        sliderHeading: '',
+        sliderTitle: '',
         sliderImage: null,
     });
-    
+
     const removeImageInputPrefilled = useRef();
-
-
-    const handleSubmit = (event) => {
-        const form = event.currentTarget
-        if (form.checkValidity() === false) {
-            event.preventDefault()
-            event.stopPropagation()
-        }
-
-        setValidated(true)
-    }
 
     const removeImageFieldState = () => {
         if (removeImageInputPrefilled.current) {
@@ -51,6 +40,24 @@ const SliderContent = () => {
             setSliderFormData(pre => ({ ...pre, [name]: files[0] }));
         else
             setSliderFormData(pre => ({ ...pre, [name]: value }));
+
+    }
+
+    const handleSubmit = (event) => {
+        const form = event.currentTarget
+        if (form.checkValidity() === false) {
+            event.preventDefault()
+            event.stopPropagation()
+            setValidated(true)
+        }
+
+        const formData = new FormData();
+
+        formData.append('sliderHeading', sliderFormData['sliderHeading']);
+        formData.append('sliderTitle', sliderFormData['sliderTitle']);
+        formData.append('sliderImage', sliderFormData['sliderImage']);
+
+        
 
     }
     return (
@@ -96,7 +103,7 @@ const SliderContent = () => {
                     <CFormInput
                         type="file"
                         aria-describedby="validationCustom03Feedback"
-                        feedbackInvalid="Please provide a valid city."
+                        feedbackInvalid="Insert your slider image."
                         id="validationCustom03"
                         label="Slider image"
                         required
@@ -114,7 +121,7 @@ const SliderContent = () => {
                     </CButton>
                 </CCol>
             </CForm>
-            
+
         </CCard>
     )
 }

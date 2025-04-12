@@ -3,35 +3,52 @@ import { CForm, CFormInput, CFormTextarea, CButton, CCard, CCardBody, CCardHeade
 import TyniMCE from "../../../components/TyniMCE";
 import ImageShow from "../../../components/ImageShow";
 import { PERSONAL_API_KEY } from "../../../config/configuration";
+import { useDispatch, useSelector } from "react-redux";
+import { addBlog } from "../../../store/action/service.blog.action";
+import { toast } from "react-toastify";
+import { bClearState } from "../../../store/reducers/service.blog.slice";
 
 const Blogs = () => {
+  const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user);
+  const {
+    blogs,
+    successMSG,
+    errorMSG,
+    bIsLoading
+  } = useSelector(state => state.blogs);
+  // console.log( blogs,
+  //   successMSG,
+  //   errorMSG,
+  //   bIsLoading)
+  const dispatch = useDispatch();
   const [validated, setValidated] = useState(false);
   const [formData, setFormData] = useState({
-    blog_header: "",
-    blog_header_image: null,
-    blog_first_heading: "",
-    blog_second_heading: "",
-    blog_second_heading_first_desc: "",
-    blog_second_heading_image: [],
-    blog_second_heading_second_desc: "",
-    blog_quotes: "",
-    blog_second_heading_third_desc: "",
-    blog_tiny_desc: ""
+    type: "",
+    mainHeading: "",
+    image: null,
+    firstHeading: "",
+    secondHeading: "",
+    secondHeadingFirstDesc: "",
+    secondHeadingImg: [],
+    secondHeadingSecDesc: "",
+    quote: "",
+    secondHeadingThirdDesc: "",
+    firstHeadingDesc: ""
   });
   const removeHeaderImageField = useRef();
   const removeSubHeaderImageField = useRef();
 
-  useEffect(() => {
-    setFormData((prevData) => ({ ...prevData, author: "John Doe" }));
-  }, []);
-
+  // useEffect(() => {
+  //   setFormData((prevData) => ({ ...prevData, author: "John Doe" }));
+  // }, []);
+  // console.log(accessToken)
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (files) {
-      if (name === 'blog_second_heading_image') {
+      if (name === 'secondHeadingImg') {
         const imgArray = []
-        Array.from(files).forEach(el =>{
+        Array.from(files).forEach(el => {
           imgArray.push(el)
         })
         setFormData(pre => ({ ...pre, [name]: imgArray }));
@@ -44,11 +61,12 @@ const Blogs = () => {
   };
 
   const removeImageFieldState = (index, name) => {
-    if (removeHeaderImageField.current && name === 'blog_header_image') {
-      removeHeaderImageField.current.value = ''
+
+    if (removeHeaderImageField.current && name === 'image') {
+      removeHeaderImageField.current.value = '';
     }
 
-    if (removeSubHeaderImageField.current && name === 'blog_second_heading_image') {
+    if (removeSubHeaderImageField.current && name === 'secondHeadingImg') {
       const filesArray = Array.from(removeSubHeaderImageField.current.files);
 
       // Remove the file at the specified index
@@ -61,32 +79,57 @@ const Blogs = () => {
       // Set the updated file list
       removeSubHeaderImageField.current.files = dataTransfer.files;
     }
-
   }
-  console.log(PERSONAL_API_KEY)
+
   const handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();
     if (form.checkValidity() === false) {
       event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
     const formDATA = new FormData();
-
     Object.keys(formData).forEach((key, index) => {
-      if (formDATA[key] === 'blog_header_image') {
-        formDATA.append('blog_header_image', formDATA[key])
-      } else if (formDATA[key] === "blog_second_heading_image" && Array.isArray(formDATA[key])) {
-        formDATA[key].forEach(element => {
-          formDATA.append('blog_second_heading_image', element);
+      if (key === 'image') {
+        formDATA.append('image', formData[key]);
+      } else if (key === "secondHeadingImg" && Array.isArray(formData[key])) {
+        formData[key].forEach(element => {
+          formDATA.append('secondHeadingImg', element);
         });
       } else {
-        formDATA.append(key, formDATA[key]);
+        formDATA.append(key, formData[key]);
       }
     })
-    console.log(...formDATA)
-    // setValidated(true);
+    // console.log(...formDATA)
+    dispatch(addBlog({ formData: formDATA, accessToken }))
   };
+
+  useEffect(() => {
+    if (successMSG) {
+      toast.success(successMSG, { position: 'top-right' });
+      removeHeaderImageField.current.value = '';
+      removeSubHeaderImageField.current.value = '';
+      setFormData({
+        type: "",
+        mainHeading: "",
+        firstHeading: "",
+        secondHeading: "",
+        secondHeadingFirstDesc: "",
+        secondHeadingSecDesc: "",
+        quote: "",
+        secondHeadingThirdDesc: "",
+        firstHeadingDesc: ""
+      });
+    }
+    if (errorMSG) {
+      toast.error(errorMSG, { position: 'top-right' })
+    }
+
+   
+    dispatch(bClearState());
+  }, [successMSG, errorMSG]);
 
   return (
     <CCard className="p-3 mb-4">
@@ -103,14 +146,23 @@ const Blogs = () => {
           <CFormLabel htmlFor="blogTitle">Blog Header</CFormLabel>
           <CFormInput
             type="text"
-            id="blogTitle"
-            name="blog_header"
-            placeholder="Enter blog header"
-            value={formData.blog_header}
+            id="blogType"
+            name="type"
+            placeholder="Enter blog type"
+            value={formData.type}
             feedbackValid="Looks good!"
             onChange={handleChange}
             required
-            
+          />
+          <CFormInput
+            type="text"
+            id="blogTitle"
+            name="mainHeading"
+            placeholder="Enter blog header"
+            value={formData.mainHeading}
+            feedbackValid="Looks good!"
+            onChange={handleChange}
+            required
           />
 
 
@@ -119,7 +171,7 @@ const Blogs = () => {
           <CFormInput
             type="file"
             id="blogHeaderImage"
-            name="blog_header_image"
+            name="image"
             feedbackValid="Looks good!"
             onChange={handleChange}
             required
@@ -127,50 +179,51 @@ const Blogs = () => {
             ref={removeHeaderImageField}
           />
 
-          <ImageShow images={formData.blog_header_image} name={"blog_header_image"} setProduct={setFormData} removeImageFieldState={removeImageFieldState} />
+          <ImageShow images={formData.image} name={"image"} setProduct={setFormData} removeImageFieldState={removeImageFieldState} />
 
           <CFormLabel htmlFor="blogFirstHeading">First Heading</CFormLabel>
           <CFormInput
             type="text"
             id="blogFirstHeading"
-            name="blog_first_heading"
+            name="firstHeading"
             placeholder="Enter first blog heading"
-            value={formData.blog_first_heading}
+            value={formData.firstHeading}
             onChange={handleChange}
             required
             className="mt-3"
           />
 
-          <TyniMCE name={'blog_tiny_desc'} funsForStateUpdate={setFormData} />
+          <TyniMCE name={'firstHeadingDesc'} funsForStateUpdate={setFormData} />
 
           <CFormLabel htmlFor="blogSecondHeading">Blog Second Heading</CFormLabel>
           <CFormInput
             type="text"
             id="blogSecondHeading"
-            name="blog_second_heading"
+            name="secondHeading"
             placeholder="Enter Blog second heading"
-            value={formData.blog_second_heading}
+            value={formData.secondHeading}
             onChange={handleChange}
             required
             className="mt-3"
           />
 
           <CFormLabel htmlFor="blogSecondHeadingFirstDesc">Second Heading First Description</CFormLabel>
-          <CFormInput
+          <CFormTextarea
             id="blogSecondHeadingFirstDesc"
-            name="blog_second_heading_first_desc"
+            name="secondHeadingFirstDesc"
             placeholder="Enter blog Second heading first description"
-            value={formData.blog_second_heading_first_desc}
+            value={formData.secondHeadingFirstDesc}
             onChange={handleChange}
             required
             className="mt-3"
+            rows={3}
           />
 
           <CFormLabel htmlFor="blogSecondHeadingImage">Blog Second Heading Image</CFormLabel>
           <CFormInput
             type="file"
             id="blogSecondHeadingImage"
-            name="blog_second_heading_image"
+            name="secondHeadingImg"
             feedbackValid="Looks good!"
             onChange={handleChange}
             required
@@ -179,46 +232,58 @@ const Blogs = () => {
             ref={removeSubHeaderImageField}
           />
 
-          <ImageShow images={formData.blog_second_heading_image} name={"blog_second_heading_image"} setProduct={setFormData} removeImageFieldState={removeImageFieldState} />
+          <ImageShow images={formData.secondHeadingImg} name={"secondHeadingImg"} setProduct={setFormData} removeImageFieldState={removeImageFieldState} />
 
           <CFormLabel htmlFor="blogSecondHeadingSecondDesc">Second Heading Second Description</CFormLabel>
-          <CFormInput
+          <CFormTextarea
             type="text"
             id="blogSecondHeadingSecondDesc"
-            name="blog_second_heading_second_desc"
+            name="secondHeadingSecDesc"
             placeholder="Enter blog Second heading second description"
-            value={formData.blog_second_heading_second_desc}
+            value={formData.secondHeadingSecDesc}
             onChange={handleChange}
             required
             className="mt-3"
+            rows={3}
           />
 
           <CFormLabel htmlFor="blogQuotes">Blog Quotes</CFormLabel>
           <CFormTextarea
             id="blogQuotes"
-            name="blog_quotes"
+            name="quote"
             rows="5"
             placeholder="Enter blog quotes"
-            value={formData.blog_quotes}
+            value={formData.quote}
             onChange={handleChange}
             required
             className="mt-3"
           />
 
           <CFormLabel htmlFor="blogSecondHeadingThirdDesc">Second Heading Third Description</CFormLabel>
-          <CFormInput
+          <CFormTextarea
             type="text"
             id="blogSecondHeadingThirdDesc"
-            name="blog_second_heading_third_desc"
+            name="secondHeadingThirdDesc"
             placeholder="Enter blog Second heading third description"
-            value={formData.blog_second_heading_third_desc}
+            value={formData.secondHeadingThirdDesc}
             onChange={handleChange}
             required
             className="mt-3"
+            rows={3}
           />
+          {/* <CFormInput
+            type="text"
+            id="blogSecondHeadingThirdDesc"
+            name="secondHeadingThirdDesc"
+            placeholder="Enter blog Second heading third description"
+            value={formData.secondHeadingThirdDesc}
+            onChange={handleChange}
+            required
+            className="mt-3"
+          /> */}
 
-          <CButton type="submit" color="primary" className="mt-3 w-25">
-            Submit
+          <CButton type="submit" color="primary" disabled={bIsLoading} className="mt-3 w-25">
+            {!bIsLoading ? `Submit` : 'Submiting...'}
           </CButton>
         </CForm>
       </CCardBody>

@@ -15,9 +15,10 @@ import ImageShow from '../../../components/ImageShow'
 import ColorShow from './ColorShow';
 import obj from './productObject';
 import { useDispatch, useSelector } from 'react-redux';
-import { addProducts } from '../../../store/action/serviceAction';
 import { toast } from 'react-toastify';
-import { pClearState } from '../../../store/reducers/serviceSlice';
+import { pClearState } from '../../../store/reducers/service.product.slice';
+import { addProducts } from '../../../store/action/service.product.action';
+
 
 const AddProducts = () => {
   const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user);

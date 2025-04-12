@@ -1,7 +1,7 @@
 import { CFormSelect } from '@coreui/react'
 import React from 'react'
 
-const Pagination = () => {
+const Pagination = ({ totalItem, totalPage, currentPage }) => {
     return (
         <>
             <hr />
@@ -17,11 +17,11 @@ const Pagination = () => {
                 </div>
 
                 <div className="d-flex gap-3 align-items-center">
-                    <p className="mb-0">1–5 of 100</p>
+                    <p className="mb-0">{currentPage} – {totalPage} of {totalItem}</p>
 
                     <div className="d-flex gap-3 align-items-center">
-                        <p style={{cursor:'pointer'}} className="fs-5 mb-0">{'<'}</p>
-                        <p style={{cursor:'pointer'}} className="fs-5 mb-0">{'>'}</p>
+                        <p style={{ cursor: 'pointer' }} className="fs-5 mb-0">{'<'}</p>
+                        <p style={{ cursor: 'pointer' }} className="fs-5 mb-0">{'>'}</p>
                     </div>
                 </div>
             </div>

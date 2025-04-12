@@ -6,9 +6,9 @@ import CIcon from '@coreui/icons-react';
 import { cilPencil, cilTrash, cilPlus } from '@coreui/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProducts } from '../../../store/action/serviceAction';
 import Swal from 'sweetalert2'
 import Pagination from '../../../components/Pagination';
+import { getProducts } from '../../../store/action/service.product.action';
 
 const columns = [
   {

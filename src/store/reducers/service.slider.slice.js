@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { addSlider, getSlider, updateSlider } from "../action/service.slider.action";
+import { addSlider, deleteSlider, getSlider, updateSlider } from "../action/service.slider.action";
 
 
 
@@ -55,7 +55,7 @@ const sliderSlice = createSlice({
                 })
             })
 
-            .addCase(getSlider.fulfilled, (state, { payload }) => {
+            .addCase(getSlider.rejected, (state, { payload }) => {
                 Object.assign(state, {
                     sliderErrorMSG: payload.message || payload,
                     sliderLoading: false,
@@ -73,25 +73,26 @@ const sliderSlice = createSlice({
                 })
             })
 
-            .addCase(updateSlider.fulfilled, (state, { payload }) => {
+            .addCase(updateSlider.rejected, (state, { payload }) => {
                 Object.assign(state, {
                     sliderErrorMSG: payload.message || payload,
                     sliderLoading: false,
                 })
             })
-            .addCase(updateSlider.pending, state => {
+
+            .addCase(deleteSlider.pending, state => {
                 Object.assign(state, {
                     sliderLoading: true,
                 })
             })
 
-            .addCase(updateSlider.fulfilled, (state, { payload }) => {
+            .addCase(deleteSlider.fulfilled, (state, { payload }) => {
                 Object.assign(state, {
                     sliderSuccMSG: payload.message,
                 })
             })
 
-            .addCase(updateSlider.fulfilled, (state, { payload }) => {
+            .addCase(deleteSlider.rejected, (state, { payload }) => {
                 Object.assign(state, {
                     sliderErrorMSG: payload.message || payload,
                     sliderLoading: false,

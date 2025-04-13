@@ -12,14 +12,12 @@ const ImageShow = ({ images, name, setProduct, removeImageFieldState }) => {
 
     useEffect(() => {
         if (images && !Array.isArray(images)) {
-            let urlImages = URL.createObjectURL(images);
-            setImg([{ name, url: urlImages }])
-            return () => URL.revokeObjectURL(urlImages);
+            setImg([{ name, url: images.startsWith("blob:") ? URL.createObjectURL(images) : images }]);
         }
 
         if (images && Array.isArray(images)) {
             let imageURL = images.map(file => {
-                return { name, url: URL.createObjectURL(file) }
+                return { name, url: file.startsWith("blob:") ? URL.createObjectURL(file) : file }
             });
             setImg([...imageURL]);
             return () => URL.revokeObjectURL(imageURL);

@@ -1,12 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addBlog, deleteBlog, getBlog } from "../action/service.blog.action";
+import { addBlog, deleteBlog, getBlog, getSignleBlog } from "../action/service.blog.action";
 
 
 const initialState = {
     blogs: [],
+    singleBlog: {},
     successMSG: null,
     errorMSG: null,
     bIsLoading: false,
+    blogOperationLoading: false,
     totalPages: 0,
     totalItems: 0,
     currentPage: 0
@@ -79,7 +81,8 @@ const service_blog_slice = createSlice({
 
             .addCase(deleteBlog.pending, state => {
                 Object.assign(state, {
-                    bIsLoading: true,
+                    // bIsLoading: true,
+                    blogOperationLoading: true,
                     successMSG: null,
                     errorMSG: null,
                 })
@@ -87,7 +90,8 @@ const service_blog_slice = createSlice({
 
             .addCase(deleteBlog.fulfilled, (state, { payload }) => {
                 Object.assign(state, {
-                    bIsLoading: false,
+                    // bIsLoading: false,
+                    blogOperationLoading: false,
                     successMSG: payload.message,
                     errorMSG: null,
                 })
@@ -95,7 +99,31 @@ const service_blog_slice = createSlice({
 
             .addCase(deleteBlog.rejected, (state, { payload }) => {
                 Object.assign(state, {
-                    bIsLoading: false,
+                    // bIsLoading: false,
+                    blogOperationLoading: false,
+                    successMSG: null,
+                    errorMSG: payload.message || payload,
+                })
+            })
+
+            .addCase(getSignleBlog.pending, state => {
+                Object.assign(state, {
+                    // bIsLoading: true,
+                    successMSG: null,
+                    errorMSG: null,
+                })
+            })
+            .addCase(getSignleBlog.fulfilled, (state, { payload }) => {
+                Object.assign(state, {
+                    // bIsLoading: false,
+                    successMSG: null,
+                    errorMSG: null,
+                    singleBlog: payload.blog
+                })
+            })
+            .addCase(getSignleBlog.rejected, (state, { payload }) => {
+                Object.assign(state, {
+                    // bIsLoading: false,
                     successMSG: null,
                     errorMSG: payload.message || payload,
                 })

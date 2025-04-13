@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { CForm, CFormInput, CFormTextarea, CButton, CCard, CCardBody, CCardHeader, CFormLabel } from "@coreui/react";
+import { CForm, CFormInput, CFormTextarea, CButton, CCard, CCardBody, CCardHeader, CFormLabel, CSpinner } from "@coreui/react";
 import TyniMCE from "../../../components/TyniMCE";
 import ImageShow from "../../../components/ImageShow";
 import { PERSONAL_API_KEY } from "../../../config/configuration";
 import { useDispatch, useSelector } from "react-redux";
-import { addBlog } from "../../../store/action/service.blog.action";
+import { addBlog, getSignleBlog } from "../../../store/action/service.blog.action";
 import { toast } from "react-toastify";
 import { bClearState } from "../../../store/reducers/service.blog.slice";
 
@@ -14,12 +14,9 @@ const Blogs = () => {
     blogs,
     successMSG,
     errorMSG,
-    bIsLoading
+    bIsLoading,
+    singleBlog
   } = useSelector(state => state.blogs);
-  // console.log( blogs,
-  //   successMSG,
-  //   errorMSG,
-  //   bIsLoading)
   const dispatch = useDispatch();
   const [validated, setValidated] = useState(false);
   const [formData, setFormData] = useState({
@@ -37,11 +34,10 @@ const Blogs = () => {
   });
   const removeHeaderImageField = useRef();
   const removeSubHeaderImageField = useRef();
-
-  // useEffect(() => {
-  //   setFormData((prevData) => ({ ...prevData, author: "John Doe" }));
-  // }, []);
-  // console.log(accessToken)
+  const params = new URLSearchParams(window.location.search);
+  const [blogid , setBlogId] = useState(params.get('blogid'))
+  
+ 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -107,6 +103,24 @@ const Blogs = () => {
   };
 
   useEffect(() => {
+    if(singleBlog && Object.keys(singleBlog).length > 0) {
+      setFormData({
+        type: singleBlog.type || "",
+        mainHeading: singleBlog.mainHeading || "",
+        image: singleBlog.image || null,
+        firstHeading: singleBlog.firstHeading || "",
+        secondHeading: singleBlog.secondHeading || "",
+        secondHeadingFirstDesc: singleBlog.secondHeadingFirstDesc || "",
+        secondHeadingImg: singleBlog.secondHeadingImg || [],
+        secondHeadingSecDesc: singleBlog.secondHeadingSecDesc || "",
+        quote: singleBlog.quote || "",
+        secondHeadingThirdDesc: singleBlog.secondHeadingThirdDesc || "",
+        firstHeadingDesc: singleBlog.firstHeadingDesc || ""
+      });
+    }
+  },[singleBlog]);
+
+  useEffect(() => {
     if (successMSG) {
       toast.success(successMSG, { position: 'top-right' });
       removeHeaderImageField.current.value = '';
@@ -127,9 +141,15 @@ const Blogs = () => {
       toast.error(errorMSG, { position: 'top-right' })
     }
 
-   
+
     dispatch(bClearState());
   }, [successMSG, errorMSG]);
+
+  useEffect(() =>{
+    if(blogid) {
+      dispatch(getSignleBlog({ accessToken, id: blogid }))
+    }
+  },[blogid]);
 
   return (
     <CCard className="p-3 mb-4">
@@ -271,19 +291,9 @@ const Blogs = () => {
             className="mt-3"
             rows={3}
           />
-          {/* <CFormInput
-            type="text"
-            id="blogSecondHeadingThirdDesc"
-            name="secondHeadingThirdDesc"
-            placeholder="Enter blog Second heading third description"
-            value={formData.secondHeadingThirdDesc}
-            onChange={handleChange}
-            required
-            className="mt-3"
-          /> */}
 
-          <CButton type="submit" color="primary" disabled={bIsLoading} className="mt-3 w-25">
-            {!bIsLoading ? `Submit` : 'Submiting...'}
+          <CButton type="submit" color="primary" disabled={bIsLoading} className="mt-3" style={{ width: '100px' }}>
+            {bIsLoading && <CSpinner size="sm" />} Submit
           </CButton>
         </CForm>
       </CCardBody>

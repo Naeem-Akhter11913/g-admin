@@ -45,3 +45,18 @@ export const deleteBlog = createAsyncThunk("blog/deleteBlog", async ({ accessTok
         return rejectWithValue(error.response?.data?.message || 'Failed to delete blog')
     }
 })
+
+
+export const getSignleBlog = createAsyncThunk('blog/getSingleBlog', async ({ accessToken, id }, { rejectWithValue }) => {
+    try {
+        const response = await axiosInstance.get(`/product/blog/get-single-blog?blogid=${id}`, {
+            headers: {
+                apiKey: PERSONAL_API_KEY,
+                Authorization: `Bearer ${accessToken}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to fetch blog')
+    }
+});

@@ -10,9 +10,9 @@ const Pagination = ({ totalItem, totalPage, currentPage }) => {
                     <p className="mx-3 mb-0">Rows per page:</p>
                     <CFormSelect size="sm" className="mb-0" aria-label="Small select example"
                         style={{ width: "70px" }}>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
+                        <option value="10">5</option>
+                        <option value="20">10</option>
+                        <option value="30">20</option>
                     </CFormSelect>
                 </div>
 

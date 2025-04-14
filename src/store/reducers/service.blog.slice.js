@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addBlog, deleteBlog, getBlog, getSignleBlog } from "../action/service.blog.action";
+import { addBlog, deleteBlog, getBlog, getSignleBlog, updateBlog } from "../action/service.blog.action";
 
 
 const initialState = {
@@ -124,6 +124,29 @@ const service_blog_slice = createSlice({
             .addCase(getSignleBlog.rejected, (state, { payload }) => {
                 Object.assign(state, {
                     // bIsLoading: false,
+                    successMSG: null,
+                    errorMSG: payload.message || payload,
+                })
+            })
+
+            .addCase(updateBlog.pending, state =>{
+                Object.assign(state,{
+                    blogOperationLoading: true,
+                    successMSG: null,
+                    errorMSG: null,
+                })
+            })
+            .addCase(updateBlog.fulfilled, (state, { payload }) => {
+                Object.assign(state, {
+                    blogOperationLoading: false,
+                    successMSG: payload.message,
+                    errorMSG: null,
+                })
+            })
+            .addCase(updateBlog.rejected, (state, { payload }) => {
+                console.log(payload)
+                Object.assign(state, {
+                    blogOperationLoading: false,
                     successMSG: null,
                     errorMSG: payload.message || payload,
                 })

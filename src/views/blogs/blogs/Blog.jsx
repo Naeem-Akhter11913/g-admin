@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { CForm, CFormInput, CFormTextarea, CButton, CCard, CCardBody, CCardHeader, CFormLabel, CSpinner } from "@coreui/react";
 import TyniMCE from "../../../components/TyniMCE";
 import ImageShow from "../../../components/ImageShow";
-import { PERSONAL_API_KEY } from "../../../config/configuration";
 import { useDispatch, useSelector } from "react-redux";
-import { addBlog, getSignleBlog } from "../../../store/action/service.blog.action";
+import { addBlog, getSignleBlog, updateBlog } from "../../../store/action/service.blog.action";
 import { toast } from "react-toastify";
 import { bClearState } from "../../../store/reducers/service.blog.slice";
 
@@ -15,7 +14,8 @@ const Blogs = () => {
     successMSG,
     errorMSG,
     bIsLoading,
-    singleBlog
+    singleBlog,
+    blogOperationLoading
   } = useSelector(state => state.blogs);
   const dispatch = useDispatch();
   const [validated, setValidated] = useState(false);
@@ -32,18 +32,20 @@ const Blogs = () => {
     secondHeadingThirdDesc: "",
     firstHeadingDesc: ""
   });
+
   const removeHeaderImageField = useRef();
   const removeSubHeaderImageField = useRef();
   const params = new URLSearchParams(window.location.search);
-  const [blogid , setBlogId] = useState(params.get('blogid'))
-  
- 
+  const [blogid, setBlogId] = useState(params.get('blogid'))
+
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (files) {
       if (name === 'secondHeadingImg') {
-        const imgArray = []
+        const prev = formData.secondHeadingImg;
+        const imgArray = Array.isArray(prev) ? [...prev] : [];
         Array.from(files).forEach(el => {
           imgArray.push(el)
         })
@@ -80,30 +82,51 @@ const Blogs = () => {
   const handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();
+
+    let fileInputs = [];
+    let originalDisabledStates = [];
+    if (blogid) {
+      fileInputs = Array.from(form.querySelectorAll('input[type="file"]'));
+      originalDisabledStates = fileInputs.map(input => input.disabled);
+      fileInputs.forEach(input => input.disabled = true);
+    }
+
     if (form.checkValidity() === false) {
       event.stopPropagation();
       setValidated(true);
+      if (blogid) fileInputs.forEach((input, i) => input.disabled = originalDisabledStates[i]);
       return;
     }
 
     const formDATA = new FormData();
     Object.keys(formData).forEach((key, index) => {
       if (key === 'image') {
-        formDATA.append('image', formData[key]);
+        const file = formData[key] instanceof File ? formData[key] : null;
+        if (file) {
+          formDATA.append('image', formData[key]);
+        } else {
+          formDATA.append('imageHTPPSurl', formData[key]);
+        }
       } else if (key === "secondHeadingImg" && Array.isArray(formData[key])) {
-        formData[key].forEach(element => {
+        formData['secondHeadingImg'].filter(file => file instanceof File).forEach(element => {
           formDATA.append('secondHeadingImg', element);
         });
+        const secondHeadingImgHTTPSurl = formData['secondHeadingImg'].filter(file => file instanceof File === false
+        );
+        secondHeadingImgHTTPSurl.forEach((url) => {
+          formDATA.append('secondHeadingImgHTPPSurl', url);
+        });
+
       } else {
         formDATA.append(key, formData[key]);
       }
-    })
-    // console.log(...formDATA)
-    dispatch(addBlog({ formData: formDATA, accessToken }))
+    });
+
+    blogid ? dispatch(updateBlog({ formData: formDATA, accessToken, blogid })) : dispatch(addBlog({ formData: formDATA, accessToken }))
   };
 
   useEffect(() => {
-    if(singleBlog && Object.keys(singleBlog).length > 0) {
+    if (singleBlog && Object.keys(singleBlog).length > 0 && blogid) {
       setFormData({
         type: singleBlog.type || "",
         mainHeading: singleBlog.mainHeading || "",
@@ -118,24 +141,26 @@ const Blogs = () => {
         firstHeadingDesc: singleBlog.firstHeadingDesc || ""
       });
     }
-  },[singleBlog]);
+  }, [singleBlog, blogid]);
 
   useEffect(() => {
     if (successMSG) {
       toast.success(successMSG, { position: 'top-right' });
       removeHeaderImageField.current.value = '';
       removeSubHeaderImageField.current.value = '';
-      setFormData({
-        type: "",
-        mainHeading: "",
-        firstHeading: "",
-        secondHeading: "",
-        secondHeadingFirstDesc: "",
-        secondHeadingSecDesc: "",
-        quote: "",
-        secondHeadingThirdDesc: "",
-        firstHeadingDesc: ""
-      });
+      if (!blogid) {
+        setFormData({
+          type: "",
+          mainHeading: "",
+          firstHeading: "",
+          secondHeading: "",
+          secondHeadingFirstDesc: "",
+          secondHeadingSecDesc: "",
+          quote: "",
+          secondHeadingThirdDesc: "",
+          firstHeadingDesc: ""
+        });
+      }
     }
     if (errorMSG) {
       toast.error(errorMSG, { position: 'top-right' })
@@ -143,13 +168,13 @@ const Blogs = () => {
 
 
     dispatch(bClearState());
-  }, [successMSG, errorMSG]);
+  }, [successMSG, errorMSG, blogid]);
 
-  useEffect(() =>{
-    if(blogid) {
+  useEffect(() => {
+    if (blogid) {
       dispatch(getSignleBlog({ accessToken, id: blogid }))
     }
-  },[blogid]);
+  }, [blogid]);
 
   return (
     <CCard className="p-3 mb-4">
@@ -184,8 +209,6 @@ const Blogs = () => {
             onChange={handleChange}
             required
           />
-
-
 
           <CFormLabel htmlFor="blogHeaderImage">Blog Header Image</CFormLabel>
           <CFormInput
@@ -293,7 +316,7 @@ const Blogs = () => {
           />
 
           <CButton type="submit" color="primary" disabled={bIsLoading} className="mt-3" style={{ width: '100px' }}>
-            {bIsLoading && <CSpinner size="sm" />} Submit
+            {blogOperationLoading && <CSpinner size="sm" />} {blogid ? 'Update' : 'Submit'}
           </CButton>
         </CForm>
       </CCardBody>

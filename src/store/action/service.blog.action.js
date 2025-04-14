@@ -60,3 +60,18 @@ export const getSignleBlog = createAsyncThunk('blog/getSingleBlog', async ({ acc
         return rejectWithValue(error.response?.data?.message || 'Failed to fetch blog')
     }
 });
+
+export const updateBlog = createAsyncThunk('blog/updateBlog', async ({ accessToken, formData, blogid }, { rejectWithValue }) => {
+    try {
+        const response = await axiosInstance.put(`/product/blog/update?blogId=${blogid}`,formData, {
+            headers: {
+                apiKey: PERSONAL_API_KEY,
+                Authorization: `Bearer ${accessToken}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.log(error)
+        return rejectWithValue(error.response?.data?.message || 'Failed to update blog')
+    }
+})

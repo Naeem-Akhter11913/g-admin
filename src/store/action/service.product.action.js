@@ -67,3 +67,17 @@ export const updateProduct = createAsyncThunk("product/updateProduct", async ({ 
         return rejectWithValue(error.response?.data?.message || 'Failed to update product')
     }
 });
+
+export const deleteProduct = createAsyncThunk("product/deleteProduct", async ({ accessToken, id }, { rejectWithValue }) => {
+    try {
+        const response = await axiosInstance.delete(`/product/delete?item_id=${id}`, {
+            headers: {
+                apiKey: PERSONAL_API_KEY,
+                Authorization: `Bearer ${accessToken}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to delete product')
+    }
+})

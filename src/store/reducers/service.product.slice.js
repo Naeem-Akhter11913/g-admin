@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addProducts, getProducts, getSingleProduct, updateProduct } from "../action/service.product.action";
+import { addProducts, deleteProduct, getProducts, getSingleProduct, updateProduct } from "../action/service.product.action";
 
 
 const initialState = {
@@ -7,8 +7,11 @@ const initialState = {
     productSuccessMSG: null,
     productErrorMSG: null,
     pIsLoading: false,
-    isProductGettingLoading:false,
-    singleProduct:{},
+    isProductGettingLoading: false,
+    singleProduct: {},
+    totalProductPages: 0,
+    totalProductItems: 0,
+    currentProductPage: 0,
 }
 
 
@@ -58,6 +61,9 @@ const serviceSlice = createSlice({
                     pIsLoading: false,
                     productSuccessMSG: null,
                     productErrorMSG: null,
+                    totalProductPages: payload.totalPages,
+                    totalProductItems: payload.totalItems,
+                    currentProductPage: payload.currentPage,
                     products: payload.products
                 })
             })
@@ -91,21 +97,42 @@ const serviceSlice = createSlice({
                     productErrorMSG: null,
                 })
             })
-            .addCase(updateProduct.pending, state =>{
+            .addCase(updateProduct.pending, state => {
                 Object.assign(state, {
                     isProductGettingLoading: true,
                     productSuccessMSG: null,
                     productErrorMSG: null,
                 });
             })
-            .addCase(updateProduct.fulfilled , (state, {payload}) =>{
+            .addCase(updateProduct.fulfilled, (state, { payload }) => {
                 Object.assign(state, {
                     isProductGettingLoading: false,
                     productSuccessMSG: payload.message,
                     productErrorMSG: null,
                 })
             })
-            .addCase(updateProduct.rejected , (state, {payload}) =>{
+            .addCase(updateProduct.rejected, (state, { payload }) => {
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: null,
+                    productErrorMSG: payload.message || payload,
+                })
+            })
+            .addCase(deleteProduct.pending, state => {
+                Object.assign(state, {
+                    isProductGettingLoading: true,
+                    productSuccessMSG: null,
+                    productErrorMSG: null,
+                });
+            })
+            .addCase(deleteProduct.fulfilled, (state, { payload }) => {
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: payload.message,
+                    productErrorMSG: null,
+                })
+            })
+            .addCase(deleteProduct.rejected, (state, { payload }) => {
                 Object.assign(state, {
                     isProductGettingLoading: false,
                     productSuccessMSG: null,

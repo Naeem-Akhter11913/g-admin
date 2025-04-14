@@ -72,16 +72,16 @@ const BlogTable = () => {
 
     const renderActionButtons = (id) => (
         <>
-        <Link to={`/blog/add-blog?blogid=${id}`} className="text-decoration-none">
-          <CButton color="primary" size="sm" className="me-2">
-            <CIcon icon={cilPencil} />
-          </CButton>
-        </Link>
-          <CButton color="danger" size="sm" onClick={() => handleDelete(id)}>
-            {blogOperationLoading ? <CSpinner size="sm" /> : <CIcon icon={cilTrash} />}
-          </CButton>
+            <Link to={`/blog/add-blog?blogid=${id}`} className="text-decoration-none">
+                <CButton color="primary" size="sm" className="me-2">
+                    <CIcon icon={cilPencil} />
+                </CButton>
+            </Link>
+            <CButton color="danger" size="sm" onClick={() => handleDelete(id)}>
+                {blogOperationLoading ? <CSpinner size="sm" /> : <CIcon icon={cilTrash} />}
+            </CButton>
         </>
-      );
+    );
 
     useEffect(() => {
         if (successMSG) {
@@ -126,7 +126,15 @@ const BlogTable = () => {
                     </CCardHeader>
 
                     <CTable columns={columns} items={items} />
-                    <Pagination totalItem={totalItem} totalPage={totalPage} currentPage={currentPage} />
+                    {/* <Pagination totalItem={totalItem} totalPage={totalPage} currentPage={currentPage} /> */}
+                    <Pagination
+                        totalItem={totalItem}
+                        totalPage={totalPage}
+                        currentPage={page} // not currentPage from Redux
+                        setPage={setPage}
+                        setLimit={setLimit}
+                    />
+
                 </>
             }
 

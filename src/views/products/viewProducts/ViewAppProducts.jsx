@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { CTable, CButton, CContainer, CSpinner, CCard, CCardHeader } from '@coreui/react'
 import CIcon from '@coreui/icons-react';
@@ -8,7 +8,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2'
 import Pagination from '../../../components/Pagination';
-import { getProducts } from '../../../store/action/service.product.action';
+import { deleteProduct, getProducts } from '../../../store/action/service.product.action';
+import { pClearState } from '../../../store/reducers/service.product.slice';
+import { toast } from 'react-toastify';
 
 const columns = [
   {
@@ -56,19 +58,22 @@ const columns = [
 const ViewAppProducts = () => {
 
   const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user);
-  const { products, productSuccessMSG, productErrorMSG, pIsLoading } = useSelector(state => state.products);
+  const { products, productSuccessMSG, productErrorMSG, pIsLoading, totalProductPages, totalProductItems, currentProductPage, isProductGettingLoading } = useSelector(state => state.products);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(5);
+  const [totalPage, setTotalPage] = useState(totalProductPages);
+  const [totalItem, setTotalItem] = useState(totalProductItems);
   const [rowProducts, setRowProducts] = useState([]);
+  const deleteIndexRef = useRef();
 
 
   const addNewProduct = _ => {
     navigate('/product/add-products');
   }
 
-  const handleDelete = e => {
+  const handleDelete = id => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -80,13 +85,8 @@ const ViewAppProducts = () => {
       background: '#212631',
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success",
-          background: '#212631',
-          confirmButtonColor: "rgb(28 60 91)",
-        });
+        dispatch(deleteProduct({ accessToken, id }));
+        deleteIndexRef.current = id;
       }
     });
   }
@@ -98,8 +98,8 @@ const ViewAppProducts = () => {
             <CIcon icon={cilPencil} />
           </CButton>
         </Link>
-        <CButton color="danger" size="sm" onClick={e => handleDelete(id)}>
-          <CIcon icon={cilTrash} />
+        <CButton color="danger" size="sm" disabled={isProductGettingLoading} onClick={e => handleDelete(id)}>
+          {isProductGettingLoading && <CSpinner size='sm' />} <CIcon icon={cilTrash} />
         </CButton>
       </>
     );
@@ -180,15 +180,51 @@ const ViewAppProducts = () => {
 
       });
 
-      setRowProducts([...array])
+      setRowProducts([...array]);
+
+      setTotalPage(totalProductPages);
+      setTotalItem(totalProductItems);
 
     }
   }, [products]);
 
 
   useEffect(() => {
+    if (productSuccessMSG && deleteIndexRef.current) {
+      toast.success(productSuccessMSG, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      })
+      const rrr = rowProducts.filter(item => item._id !== deleteIndexRef.current).map((item, index) => ({ ...item, id: index + 1 }));
+      deleteIndexRef.current = null;
+      setRowProducts([...rrr]);
+    }
+
+    if (productErrorMSG) {
+      toast.error(productErrorMSG, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      })
+    }
+    dispatch(pClearState())
+  }, [dispatch, productSuccessMSG, productErrorMSG, deleteIndexRef.current])
+
+
+  useEffect(() => {
     dispatch(getProducts({ accessToken, page, limit }))
-  }, []);
+  }, [accessToken, page, limit]);
 
   return (
 
@@ -210,7 +246,13 @@ const ViewAppProducts = () => {
         </div>
       ) : (<>
         <CTable hover columns={columns} items={rowProducts} />
-        <Pagination />
+        {/* <Pagination /> */}
+        <Pagination
+          totalItem={totalItem}
+          totalPage={totalPage}
+          currentPage={page} // not currentPage from Redux
+          setPage={setPage}
+          setLimit={setLimit} />
       </>
 
       )}

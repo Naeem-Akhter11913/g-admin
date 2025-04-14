@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react'
 
 const ColorShow = ({ colorArray , setProduct }) => {
     const [color,setColor] = useState([]);
-
     const deleteColor = index => {
         const updateColor = colorArray.split(",").filter((_,i) => i !== index)
         setProduct(pre => ({...pre, ['color']:updateColor.join(',')}));
     }
 
     useEffect(() =>{
-        if(!Array.isArray(colorArray)){
+        if(colorArray && !Array.isArray(colorArray)){
             setColor(colorArray.split(','))
         }
     },[colorArray])

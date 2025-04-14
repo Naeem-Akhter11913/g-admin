@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addProducts, getProducts } from "../action/service.product.action";
+import { addProducts, getProducts, getSingleProduct, updateProduct } from "../action/service.product.action";
 
 
 const initialState = {
@@ -7,6 +7,8 @@ const initialState = {
     productSuccessMSG: null,
     productErrorMSG: null,
     pIsLoading: false,
+    isProductGettingLoading:false,
+    singleProduct:{},
 }
 
 
@@ -64,6 +66,50 @@ const serviceSlice = createSlice({
                     pIsLoading: false,
                     productSuccessMSG: null,
                     productErrorMSG: null,
+                })
+            })
+
+            .addCase(getSingleProduct.pending, state => {
+                Object.assign(state, {
+                    isProductGettingLoading: true,
+                    productSuccessMSG: null,
+                    productErrorMSG: null,
+                });
+            })
+            .addCase(getSingleProduct.fulfilled, (state, { payload }) => {
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: null,
+                    productErrorMSG: null,
+                    singleProduct: payload.singleProduct
+                })
+            })
+            .addCase(getSingleProduct.rejected, (state, { payload }) => {
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: null,
+                    productErrorMSG: null,
+                })
+            })
+            .addCase(updateProduct.pending, state =>{
+                Object.assign(state, {
+                    isProductGettingLoading: true,
+                    productSuccessMSG: null,
+                    productErrorMSG: null,
+                });
+            })
+            .addCase(updateProduct.fulfilled , (state, {payload}) =>{
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: payload.message,
+                    productErrorMSG: null,
+                })
+            })
+            .addCase(updateProduct.rejected , (state, {payload}) =>{
+                Object.assign(state, {
+                    isProductGettingLoading: false,
+                    productSuccessMSG: null,
+                    productErrorMSG: payload.message || payload,
                 })
             })
     }

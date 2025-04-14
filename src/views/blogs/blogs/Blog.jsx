@@ -78,7 +78,7 @@ const Blogs = () => {
       removeSubHeaderImageField.current.files = dataTransfer.files;
     }
   }
-
+ 
   const handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();

@@ -9,7 +9,8 @@ import {
   CFormTextarea,
   CImage,
   CCard,
-  CCardHeader
+  CCardHeader,
+  CSpinner
 } from '@coreui/react'
 import ImageShow from '../../../components/ImageShow'
 import ColorShow from './ColorShow';
@@ -17,12 +18,12 @@ import obj from './productObject';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { pClearState } from '../../../store/reducers/service.product.slice';
-import { addProducts } from '../../../store/action/service.product.action';
+import { addProducts, getSingleProduct, updateProduct } from '../../../store/action/service.product.action';
 
 
 const AddProducts = () => {
   const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user);
-  const { products, productSuccessMSG, productErrorMSG, pIsLoading } = useSelector(state => state.products);
+  const { products, isProductGettingLoading, singleProduct, productSuccessMSG, productErrorMSG, pIsLoading } = useSelector(state => state.products);
 
   const [validated, setValidated] = useState(false);
   const [product, setProduct] = useState({ ...obj });
@@ -31,7 +32,9 @@ const AddProducts = () => {
   const fronImgeRef = useRef();
   const backImgeRef = useRef();
   const removeMultiple = useRef();
-
+  const urlParamsObject = new URLSearchParams(window.location.search);
+  const [productid, setProductid] = useState(urlParamsObject.get('productid'))
+  // console.log(productid)
 
   const handleCollectFormData = e => {
     const { name, files, value } = e.target;
@@ -43,7 +46,8 @@ const AddProducts = () => {
       })
 
       if (array.includes('multiple')) {
-        setProduct(pre => ({ ...pre, [name]: Array.from(files) }))
+        const prev = Array.isArray(product['images']) ? [...product['images']] : [];
+        setProduct(pre => ({ ...pre, [name]: [...prev, ...Array.from(files)] }))
       } else {
         setProduct(pre => ({ ...pre, [name]: files[0] }))
       }
@@ -91,26 +95,43 @@ const AddProducts = () => {
   const handleSubmit = (event) => {
     const form = event.currentTarget
     event.preventDefault();
+
+    let fileInputs = [];
+    let originalDisabledStates = [];
+    if (productid) {
+      fileInputs = Array.from(form.querySelectorAll('input[type="file"]'));
+      originalDisabledStates = fileInputs.map(input => input.disabled);
+      fileInputs.forEach(input => input.disabled = true);
+    }
+
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
       setValidated(true);
+      if (blogid) fileInputs.forEach((input, i) => input.disabled = originalDisabledStates[i]);
       return;
     }
     const formData = new FormData();
 
     Object.keys(product).forEach(key => {
-      if (key === "frontImage" || key === "backImage") {
-        if (product[key]) formData.append(key, product[key]);
+      if (key === "frontImage") {
+        product['frontImage'] instanceof File === true ? formData.append('frontImage', product[key]) : formData.append('frontImageURL', product['frontImage']);
+      } else if (key === "backImage") {
+        product[key] instanceof File === true ? formData.append('backImage', product['backImage']): formData.append('backImageURL', product[key]);
       } else if (key === "images" && Array.isArray(product[key])) {
-        product[key].forEach((image, index) => {
+        product[key].filter(url => url instanceof File === true).forEach((image, index) => {
           formData.append(`images`, image);
         });
+        product[key].filter(url => url instanceof File === false).forEach((image, index) => {
+          formData.append(`imagesHTTPsURL`, image);
+        });
+
       } else {
         formData.append(key, product[key]);
       }
     });
-    dispatch(addProducts({ formData: formData, accessToken }));
+    // return;
+    productid ? dispatch(updateProduct({ formData, accessToken, productid })) : dispatch(addProducts({ formData: formData, accessToken }));
   }
 
 
@@ -124,6 +145,30 @@ const AddProducts = () => {
     }
     dispatch(pClearState());
   }, [productErrorMSG, productSuccessMSG]);
+
+  useEffect(() => {
+    if (productid && singleProduct && Object.keys(singleProduct).length > 0) {
+      const { specifications, description, ...rest } = singleProduct;
+      setProduct({
+        ...rest,
+        ...specifications,
+        ...description,
+        color: description.color.join(','),
+        size: specifications.size.join(','),
+        productColor: specifications.productColor.join(','),
+        suggestedUse: description.suggestedUse.join(','),
+        otherIngredients: description.otherIngredients.join(','),
+        warnings: description.warnings.join(','),
+      });
+    }
+  }, [singleProduct, productid])
+
+  useEffect(() => {
+    if (productid) {
+      dispatch(getSingleProduct({ accessToken, productid }))
+    }
+  }, [productid]);
+
 
   return (
     <CCard className="p-3 mb-4">
@@ -524,7 +569,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom26"
-            label="Weight without wheels"
+            label="Weight without wheels [ in kg ]"
             placeholder='Weight without wheels'
             name='weightWithoutWheels'
             required
@@ -537,7 +582,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom27"
-            label="Weight capacity"
+            label="Weight capacity [ in kg ]"
             placeholder='Weight capacity'
             name='weightCapacity'
             value={product && product.weightCapacity}
@@ -550,7 +595,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom28"
-            label="Width"
+            label="Width [ in cm ]"
             placeholder='Width'
             name='width'
             value={product && product.width}
@@ -563,7 +608,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom29"
-            label="Height"
+            label="Height [ in cm ]"
             placeholder='Height'
             name='handleHeight'
             required
@@ -589,7 +634,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom31"
-            label="Seat back height"
+            label="Seat back height [ in cm ]"
             placeholder='Seat back height'
             name='seatBackHeight'
             required
@@ -602,7 +647,7 @@ const AddProducts = () => {
             type="text"
             feedbackValid="Looks good!"
             id="validationCustom32"
-            label="Head room inside canopy"
+            label="Head room inside canopy [ in cm ]"
             placeholder='Head room inside canopy'
             name='headRoomInsideCanopy'
             required
@@ -637,8 +682,8 @@ const AddProducts = () => {
           />
         </CCol>
         <CCol xs={12} className='mb-4'>
-          <CButton color="primary" type="submit" disabled={pIsLoading}>
-            Submit form
+          <CButton color="primary" type="submit" disabled={isProductGettingLoading}>
+            {isProductGettingLoading && <CSpinner size='sm' />} {productid ? 'Update Product' : 'Add Product'}
           </CButton>
         </CCol>
       </CForm>

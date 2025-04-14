@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { CTable, CButton, CContainer, CSpinner, CCard, CCardHeader } from '@coreui/react'
 import CIcon from '@coreui/icons-react';
 import { cilPencil, cilTrash, cilPlus } from '@coreui/icons';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2'
 import Pagination from '../../../components/Pagination';
@@ -60,7 +60,7 @@ const ViewAppProducts = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
   const [rowProducts, setRowProducts] = useState([]);
 
 
@@ -77,18 +77,32 @@ const ViewAppProducts = () => {
       confirmButtonColor: "rgb(28 60 91)",
       cancelButtonColor: "rgb(112 20 20)",
       confirmButtonText: "Yes, delete it!",
-      background:'#212631',
+      background: '#212631',
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
           title: "Deleted!",
           text: "Your file has been deleted.",
           icon: "success",
-          background:'#212631',    
-          confirmButtonColor: "rgb(28 60 91)",      
+          background: '#212631',
+          confirmButtonColor: "rgb(28 60 91)",
         });
       }
     });
+  }
+  const actionButtons = (id) => {
+    return (
+      <>
+        <Link to={`/product/add-products?productid=${id}`}>
+          <CButton color="primary" size="sm" className="me-2">
+            <CIcon icon={cilPencil} />
+          </CButton>
+        </Link>
+        <CButton color="danger" size="sm" onClick={e => handleDelete(id)}>
+          <CIcon icon={cilTrash} />
+        </CButton>
+      </>
+    );
   }
 
   useEffect(() => {
@@ -158,16 +172,7 @@ const ViewAppProducts = () => {
           _id,
           id: i + 1,
           ...rest,
-          action: (
-            <>
-              <CButton color="primary" size="sm" className="me-2">
-                <CIcon icon={cilPencil} />
-              </CButton>
-              <CButton color="danger" size="sm" onClick={e => handleDelete(e)}>
-                <CIcon icon={cilTrash} />
-              </CButton>
-            </>
-          ),
+          action: actionButtons(_id),
           _cellProps: { id: { scope: 'row' } },
         };
 

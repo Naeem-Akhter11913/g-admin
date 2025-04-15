@@ -3,7 +3,8 @@ import uiSlice from './reducers/uiSlice';
 import authSlice from './reducers/authSlice';
 import serviceSlice from './reducers/service.product.slice';
 import serviceBlogSlice from './reducers/service.blog.slice';
-import slideSlider from './reducers/service.slider.slice'
+import slideSlice from './reducers/admin.slider.slice'
+
 
 const store = configureStore({
     reducer: {
@@ -11,7 +12,7 @@ const store = configureStore({
         user: authSlice,
         products: serviceSlice,
         blogs: serviceBlogSlice,
-        slider: slideSlider
+        sliders: slideSlice
     }
 });
 

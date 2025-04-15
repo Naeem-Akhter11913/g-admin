@@ -1,22 +1,22 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     CCol,
     CButton,
     CForm,
-    CFormCheck,
-    CFormFeedback,
     CFormInput,
-    CFormLabel,
-    CInputGroup,
-    CInputGroupText,
-    CFormSelect,
     CCard,
-    CCardHeader
+    CCardHeader,
+    CSpinner
 } from '@coreui/react'
 import ImageShow from '../../components/ImageShow'
-import PreviewImageModal from '../../components/PreviewImageModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { addSlider } from '../../store/action/admin.slider.action';
+import { toast } from 'react-toastify';
+import { sliderClearState } from '../../store/reducers/admin.slider.slice';
 
 const SliderContent = () => {
+    const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user);
+    const { slider, sliderPostLoading, sliderGetLoading, sliderUpdateLoading, sliderDeleteLoading, sliderErrorMSG, sliderSuccessMSG } = useSelector(state => state.sliders);
 
     const [validated, setValidated] = useState(false);
     const [sliderFormData, setSliderFormData] = useState({
@@ -24,6 +24,7 @@ const SliderContent = () => {
         sliderTitle: '',
         sliderImage: null,
     });
+    const dispatch = useDispatch();
 
     const removeImageInputPrefilled = useRef();
 
@@ -44,7 +45,8 @@ const SliderContent = () => {
     }
 
     const handleSubmit = (event) => {
-        const form = event.currentTarget
+        const form = event.currentTarget;
+        event.preventDefault()
         if (form.checkValidity() === false) {
             event.preventDefault()
             event.stopPropagation()
@@ -52,14 +54,39 @@ const SliderContent = () => {
         }
 
         const formData = new FormData();
-
         formData.append('sliderHeading', sliderFormData['sliderHeading']);
         formData.append('sliderTitle', sliderFormData['sliderTitle']);
         formData.append('sliderImage', sliderFormData['sliderImage']);
 
-        
-
+        dispatch(addSlider({ accessToken, formData }));
     }
+
+    useEffect(() => {
+        if (sliderErrorMSG) {
+            toast.error(sliderErrorMSG, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        }
+        if (sliderSuccessMSG) {
+            toast.success(sliderSuccessMSG, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            })
+        }
+        dispatch(sliderClearState())
+    }, [dispatch, sliderErrorMSG, sliderSuccessMSG]);
+
     return (
         <CCard className="p-3">
             <CCardHeader className='d-flex justify-content-between mb-3'>
@@ -116,8 +143,8 @@ const SliderContent = () => {
                 </CCol>
 
                 <CCol xs={12}>
-                    <CButton color="primary" type="submit">
-                        Submit form
+                    <CButton color="primary" type="submit" disabled={sliderPostLoading || sliderUpdateLoading}>
+                        {(sliderPostLoading || sliderUpdateLoading) && <CSpinner size='sm' />} Submit form
                     </CButton>
                 </CCol>
             </CForm>

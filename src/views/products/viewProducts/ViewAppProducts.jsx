@@ -104,7 +104,6 @@ const ViewAppProducts = () => {
       </>
     );
   }
-
   useEffect(() => {
     if (products && Array.isArray(products) && products.length > 0) {
       const array = []
@@ -204,6 +203,7 @@ const ViewAppProducts = () => {
       const rrr = rowProducts.filter(item => item._id !== deleteIndexRef.current).map((item, index) => ({ ...item, id: index + 1 }));
       deleteIndexRef.current = null;
       setRowProducts([...rrr]);
+      dispatch(pClearState())
     }
 
     if (productErrorMSG) {
@@ -217,8 +217,8 @@ const ViewAppProducts = () => {
         progress: undefined,
         theme: "dark",
       })
+      dispatch(pClearState())
     }
-    dispatch(pClearState())
   }, [dispatch, productSuccessMSG, productErrorMSG, deleteIndexRef.current])
 
 

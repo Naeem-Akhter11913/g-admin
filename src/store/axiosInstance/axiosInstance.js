@@ -12,7 +12,7 @@ import { getAccessToken } from "../action/authAction";
 import axios from "axios";
 import { setAccessToken } from "../reducers/authSlice";
 import store from '../store';
-
+console.log(BASE_URL)
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true, // 🔑 send refreshToken cookie automatically

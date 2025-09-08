@@ -55,7 +55,7 @@ const sliderSlice = createSlice({
             .addCase(getSlider.fulfilled, (state, { payload }) => {
                 Object.assign(state, {
                     sliderGetLoading: false,
-                    sliderSuccessMSG: payload.message,
+                    sliderSuccessMSG: null,
                     slider: payload.sliderContent
                 })
             })

@@ -1,9 +1,9 @@
-import React, { Suspense } from 'react'
+import React, { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { CContainer, CSpinner } from '@coreui/react'
 
-// routes config
 import routes from '../routes'
+const ProtectedRoute = lazy(() => import('./ProtectedRoute'))
 
 
 
@@ -23,9 +23,12 @@ const AppContent = () => {
                 <Route
                   key={idx}
                   path={route.path}
-                  // exact={route?.exact}
                   name={route.name}
-                  element={<route.element />}
+                  element={
+                    <ProtectedRoute>
+                      <route.element />
+                    </ProtectedRoute>
+                  }
                 />
               )
             )

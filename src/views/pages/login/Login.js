@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   CButton,
   CCard,
@@ -11,20 +11,17 @@ import {
   CFormInput,
   CInputGroup,
   CInputGroupText,
-  CRow, 
+  CRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
-import { useAuth } from '../../../hook/AuthContext'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { clearMessages } from '../../../store/reducers/authSlice'
 import { loginUser } from '../../../store/action/authAction'
 
 const Login = () => {
-  const { accessToken , errorMessage, successMessage, loading } = useSelector(state => state.user)
-  const { useIsAuthenticate, valid } = useAuth();
-  const navigate = useNavigate();
+  const { accessToken, errorMessage, successMessage, loading } = useSelector(state => state.user)
   const dispatch = useDispatch();
   const [loginFormData, setLoginFormData] = useState({
     email: 'dreamabroad83@gmail.com', password: 'Abcd@1234'
@@ -34,10 +31,11 @@ const Login = () => {
     const { name, value } = e.target;
     setLoginFormData(pre => ({ ...pre, [name]: value }))
   }
+
+
   const handLogin = e => {
     e.preventDefault();
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    // useIsAuthenticate(" ");
     if (!loginFormData.email || !loginFormData.email.includes('@')) {
       toast.error("Enter valid email")
       return;
@@ -50,26 +48,20 @@ const Login = () => {
   }
 
   useEffect(() => {
-    if (accessToken) {
-      useIsAuthenticate(accessToken);
+    if (successMessage) {
+      toast.success(successMessage, { position: 'top-right' });
+      setLoginFormData(pre => ({ ...pre, name: null, familyName: null, email: null, password: null, repeat_password: null }));
     }
-  }, [accessToken])
 
-  useEffect(() => {
-    if (valid) navigate('/dashboard')
-  }, [valid]);
+    if (errorMessage)
+      toast.error(errorMessage, { position: 'top-right' });
 
-  useEffect(() => {
-      if (successMessage) {
-        toast.success(successMessage, { position: 'top-right' });
-        navigate('/login');
-        setLoginFormData(pre => ({ ...pre, name: null, familyName: null, email: null, password: null, repeat_password: null }));
-      }
-      if (errorMessage) {
-        toast.error(errorMessage, { position: 'top-right' })
-      }
-      dispatch(clearMessages());
-    }, [errorMessage, successMessage])
+    dispatch(clearMessages());
+
+  }, [errorMessage, successMessage]);
+
+  if (accessToken)
+    return <Navigate to="/dashboard" replace />;
 
 
   return (
@@ -84,9 +76,6 @@ const Login = () => {
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">
-                      {/* <CInputGroupText>
-                        <CIcon icon={cilUser} />
-                      </CInputGroupText> */}
                       <CInputGroupText>@</CInputGroupText>
                       <CFormInput onChange={handleChange} value={loginFormData.email} type='email' name='email' placeholder="Enter your email" autoComplete="email" />
                     </CInputGroup>

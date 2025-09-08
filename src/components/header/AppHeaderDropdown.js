@@ -14,10 +14,8 @@ import {
   cilCreditCard,
   cilCommentSquare,
   cilEnvelopeOpen,
-  cilFile,
   cilLockLocked,
   cilSettings,
-  cilTask,
   cilUser,
   cilAccountLogout
 } from '@coreui/icons'
@@ -27,7 +25,6 @@ import avatar8 from '/images/avatars/8.jpg'
 import { customSweetAlert } from '../Popups';
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { clearMessages } from '../../store/reducers/authSlice'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hook/AuthContext'
 
@@ -58,13 +55,10 @@ const AppHeaderDropdown = () => {
   useEffect(() => {
     if (errorMessage) {
       toast.error(errorMessage, { position: 'top-right' });
-      dispatch(clearMessages());
     }
     if (successMessage) {
-      navigate('/login');
-      dispatch(clearMessages());
+      toast.success(errorMessage, { position: 'top-right' });
     }
-
   }, [errorMessage, successMessage]);
 
   

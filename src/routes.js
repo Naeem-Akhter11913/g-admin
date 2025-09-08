@@ -39,7 +39,8 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'));
 
 const Payments = React.lazy(() => import('./views/payments/Payments'))
 
-const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
+const Widgets = React.lazy(() => import('./views/widgets/Widgets'));
+const ProvateRoute = React.lazy(() => import('./components/ProtectedRoute'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -55,6 +56,11 @@ const routes = [
 
   // Blogs
   { path: '/blog/add-blog', name: 'Blog', element: Blog },
+  // { path: '/blog/add-blog', name: 'Blog', element: {(
+  //   <>
+  //   <Prod
+  //   </>
+  // )} },
   { path: '/blog/blog-table', name: 'BlogTable', element: BlogTable },
   
   // Slider

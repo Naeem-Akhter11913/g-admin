@@ -8,16 +8,11 @@ export const customSweetAlert = (yesButtonText, heading, title, afterLogoutText,
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "rgb(28 60 91)",
-      cancelButtonColor: "rgb(112 20 20)",
-    background:'#212631',
+    cancelButtonColor: "rgb(112 20 20)",
+    background: '#212631',
     confirmButtonText: yesButtonText || "Yes, delete it!"
   }).then((result) => {
-    if (result.isConfirmed) {
-      dispatch(userLogout()).then(() => {
-        logout()
-        // localStorage.setItem("isLogout",true);
-        navigate('/login');
-      });
-    } 
+    if (result.isConfirmed)
+      dispatch(userLogout())
   });
 }

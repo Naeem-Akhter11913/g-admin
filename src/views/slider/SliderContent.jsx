@@ -6,11 +6,12 @@ import {
     CFormInput,
     CCard,
     CCardHeader,
-    CSpinner
+    CSpinner,
+    CFormSwitch
 } from '@coreui/react'
 import ImageShow from '../../components/ImageShow'
 import { useDispatch, useSelector } from 'react-redux';
-import { addSlider } from '../../store/action/admin.slider.action';
+import { addSlider, getSlider, updateSlider } from '../../store/action/admin.slider.action';
 import { toast } from 'react-toastify';
 import { sliderClearState } from '../../store/reducers/admin.slider.slice';
 
@@ -23,6 +24,7 @@ const SliderContent = () => {
         sliderHeading: '',
         sliderTitle: '',
         sliderImage: null,
+        isShow: false,
     });
     const dispatch = useDispatch();
 
@@ -46,19 +48,33 @@ const SliderContent = () => {
 
     const handleSubmit = (event) => {
         const form = event.currentTarget;
-        event.preventDefault()
+        event.preventDefault();
+
+        let fileInputs = [];
+        let originalDisabledStates = [];
+        if (slider && Object.keys(slider).length > 0) {
+            fileInputs = Array.from(form.querySelectorAll('input[type="file"]'));
+            originalDisabledStates = fileInputs.map(input => input.disabled);
+            fileInputs.forEach(input => input.disabled = true);
+        }
+
+
         if (form.checkValidity() === false) {
-            event.preventDefault()
-            event.stopPropagation()
+            event.preventDefault();
+            event.stopPropagation();
+            if (slider && Object.keys(slider).length > 0) fileInputs.forEach((input, i) => input.disabled = originalDisabledStates[i]);
             setValidated(true)
         }
 
         const formData = new FormData();
         formData.append('sliderHeading', sliderFormData['sliderHeading']);
         formData.append('sliderTitle', sliderFormData['sliderTitle']);
-        formData.append('sliderImage', sliderFormData['sliderImage']);
+        formData.append('isShow', sliderFormData['isShow']);
 
-        dispatch(addSlider({ accessToken, formData }));
+
+        sliderFormData['sliderImage'] instanceof File ? formData.append('sliderImage', sliderFormData['sliderImage']) : formData.append('sliderImageURL', sliderFormData['sliderImage']);
+
+        slider && Object.keys(slider).length > 0 ? dispatch(updateSlider({ accessToken, id: slider._id, formData })) : dispatch(addSlider({ accessToken, formData }));
     }
 
     useEffect(() => {
@@ -87,6 +103,22 @@ const SliderContent = () => {
         dispatch(sliderClearState())
     }, [dispatch, sliderErrorMSG, sliderSuccessMSG]);
 
+    useEffect(() => {
+        dispatch(getSlider({ accessToken }))
+    }, []);
+
+    useEffect(() => {
+        console.log(slider)
+        if (slider && Object.keys(slider).length > 0) {
+            setSliderFormData({
+                sliderHeading: slider.sliderHeading || '',
+                sliderTitle: slider.sliderTitle || '',
+                sliderImage: slider.sliderImage || null,
+                isShow: slider.isShow || false,
+            })
+        }
+
+    }, [slider])
     return (
         <CCard className="p-3">
             <CCardHeader className='d-flex justify-content-between mb-3'>
@@ -142,9 +174,31 @@ const SliderContent = () => {
                     <ImageShow images={sliderFormData.sliderImage} name={'sliderImage'} setProduct={setSliderFormData} removeImageFieldState={removeImageFieldState} />
                 </CCol>
 
+                <CCol md={12}>
+                    <CFormSwitch
+                        name='isShow'
+                        checked={sliderFormData.isShow}
+                        
+                        onChange={(e) =>
+                            setSliderFormData(prev => ({ ...prev, isShow: e.target.checked }))
+                        }
+                        label={
+                            <>
+                                Your Slider will{" "}
+                                {sliderFormData.isShow ? (
+                                    <span className="text-success">show</span>
+                                ) : (
+                                    <span className="text-danger">not show</span>
+                                )}{" "}
+                                in the client home page
+                            </>
+                        }
+                    />
+                </CCol>
+
                 <CCol xs={12}>
                     <CButton color="primary" type="submit" disabled={sliderPostLoading || sliderUpdateLoading}>
-                        {(sliderPostLoading || sliderUpdateLoading) && <CSpinner size='sm' />} Submit form
+                        {(sliderPostLoading || sliderUpdateLoading) && <CSpinner size='sm' />} {(slider && Object.keys(slider).length > 0) ? "Update Slider" : "Submit form"}
                     </CButton>
                 </CCol>
             </CForm>

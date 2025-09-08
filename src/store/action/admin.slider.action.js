@@ -34,7 +34,7 @@ export const getSlider = createAsyncThunk('slider/getSlider', async ({ accessTok
 
 export const updateSlider = createAsyncThunk('slider/updateSlider', async ({ accessToken, id, formData }, { rejectWithValue }) => {
     try {
-        const response = await axiosInstance.put(`/slider/edit?sliderid=${id}`, formData, {
+        const response = await axiosInstance.put(`/product/slider/edit?sliderid=${id}`, formData, {
             headers: {
                 apiKey: PERSONAL_API_KEY,
                 Authorization: `Bearer ${accessToken}`,

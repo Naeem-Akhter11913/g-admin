@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAccessToken, loginUser, registerUser, userLogout } from "../action/authAction";
+import {
+    getAccessToken,
+    loginUser,
+    registerUser,
+    userLogout,
+} from "../action/authAction";
 
 const initialState = {
     user: null,
@@ -7,109 +12,100 @@ const initialState = {
     loading: false,
     errorMessage: null,
     successMessage: null,
-    isLoginSuccess:false
+    isLoginSuccess: false,
 };
 
-
 const authSlice = createSlice({
-    name: 'auth',
+    name: "auth",
     initialState,
     reducers: {
         clearMessages: (state) => {
-            Object.assign(state, {
-                errorMessage: null,
-                successMessage: null,
-            });
+            state.errorMessage = null;
+            state.successMessage = null;
+        },
+        setAccessToken: (state, action) => {
+            state.accessToken = action.payload;
+        },
+        resetAuth: (state) => {
+            state.user = null;
+            state.accessToken = null;
+            state.loading = false;
+            state.errorMessage = null;
+            state.successMessage = null;
+            state.isLoginSuccess = false;
         },
     },
 
-    extraReducers: builder => {
+    extraReducers: (builder) => {
         builder
-            .addCase(registerUser.pending, state => {
-                Object.assign(state, {
-                    loading: true,
-                    errorMessage: null,
-                    successMessage: null
-                });
+            .addCase(registerUser.pending, (state) => {
+                state.loading = true;
+                state.errorMessage = null;
+                state.successMessage = null;
             })
             .addCase(registerUser.fulfilled, (state, { payload }) => {
-                Object.assign(state, {
-                    loading: false,
-                    user: payload.user,
-                    accessToken: payload.accessToken,
-                    successMessage: payload.message,
-                });
+                state.loading = false;
+                state.user = payload.user;
+                state.accessToken = payload.accessToken;
+                state.successMessage = payload.message;
             })
             .addCase(registerUser.rejected, (state, { payload }) => {
-                Object.assign(state, { loading: false, errorMessage: payload });
+                state.loading = false;
+                state.errorMessage = payload;
             })
 
-            // for user login
-            .addCase(loginUser.pending, state => {
-                Object.assign(state, {
-                    loading: true,
-                    errorMessage: null,
-                    successMessage: null
-                });
+            .addCase(loginUser.pending, (state) => {
+                state.loading = true;
+                state.errorMessage = null;
+                state.successMessage = null;
             })
             .addCase(loginUser.fulfilled, (state, { payload }) => {
-                Object.assign(state, {
-                    loading: false,
-                    accessToken: payload.accessToken,
-                    user: payload.user,
-                    successMessage: payload.message,
-                    errorMessage:null,
-                    isLoginSuccess:true
-                });
+                state.loading = false;
+                state.accessToken = payload.accessToken;
+                state.user = payload.user;
+                state.successMessage = payload.message;
+                state.errorMessage = null;
+                state.isLoginSuccess = true;
             })
             .addCase(loginUser.rejected, (state, { payload }) => {
-                Object.assign(state, { loading: false, errorMessage: payload })
+                state.loading = false;
+                state.errorMessage = payload;
             })
 
-            // generate access token
-
-            .addCase(getAccessToken.pending, state => {
-                Object.assign(state, {
-                    loading: true,
-                    errorMessage: null,
-                    successMessage: null
-                });
+            .addCase(getAccessToken.pending, (state) => {
+                state.loading = true;
+                state.errorMessage = null;
+                state.successMessage = null;
             })
             .addCase(getAccessToken.fulfilled, (state, { payload }) => {
-                Object.assign(state, {
-                    loading: false,
-                    accessToken: payload.accessToken,
-                    user: payload.user,
-                    isLoginSuccess:true
-                });
+                state.loading = false;
+                state.accessToken = payload.accessToken;
+                state.user = payload.user;
+                state.isLoginSuccess = true;
             })
-            .addCase(getAccessToken.rejected, (state, { payload }) => {
-                Object.assign(state, { loading: false, errorMessage: null })
+            .addCase(getAccessToken.rejected, (state) => {
+                state.loading = false;
+                state.errorMessage = null;
             })
 
-            // logout user
-            .addCase(userLogout.pending, state => {
-                Object.assign(state, {
-                    loading: true,
-                    errorMessage: null,
-                    successMessage: null
-                });
+            .addCase(userLogout.pending, (state) => {
+                state.loading = true;
+                state.errorMessage = null;
+                state.successMessage = null;
             })
             .addCase(userLogout.fulfilled, (state, { payload }) => {
-                Object.assign(state, {
-                    user: null,
-                    accessToken: null,
-                    loading: false,
-                    errorMessage: null,
-                    successMessage: payload.message,
-                });
+                state.user = null;
+                state.accessToken = null;
+                state.loading = false;
+                state.errorMessage = null;
+                state.successMessage = payload.message;
             })
             .addCase(userLogout.rejected, (state, { payload }) => {
-                Object.assign(state, { loading: false, errorMessage: payload })
-            })
-    }
-})
+                state.loading = false;
+                state.errorMessage = payload;
+            });
+    },
+});
 
-export const { clearMessages } = authSlice.actions;
-
+export const { clearMessages, setAccessToken, resetAuth } = authSlice.actions;
 export default authSlice.reducer;
